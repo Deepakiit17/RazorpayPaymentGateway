@@ -1,5 +1,5 @@
 import Axios from "axios";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import { server } from "./server";
 
@@ -10,23 +10,32 @@ function App() {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
 
+  const [order_id, setOrder_id] = useState("");
+
   const handlePaymentSuccess = async (response) => {
     try {
       let bodyData = new FormData();
 
       // we will send the response we've got from razorpay to the backend to validate the payment
-      bodyData.append("response", JSON.stringify(response));
-      console.log(response);
-      console.log({
-        razorpay_payment_id: response.razorpay_payment_id,
-        razorpay_order_id: response.razorpay_order_id,
-        razorpay_signature: response.razorpay_signature,
-      });
+      bodyData.append("response", response);
+      console.log(bodyData);
+
+      // useEffect(() => {
+      //   // storing input name
+      //   localStorage.setItem("data", JSON.stringify(data));
+      // }, [data]);
+
+      // localStorage.setItem('response', response);
+      // console.log({
+      //   razorpay_payment_id: response.razorpay_payment_id,
+      //   razorpay_order_id: response.razorpay_order_id,
+      //   razorpay_signature: response.razorpay_signature,
+      // });
 
       await Axios({
         url: `https://shreegoshala.herokuapp.com/paymenthandler/`,
         method: "POST",
-        data: bodyData,
+        data: response,
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -36,6 +45,7 @@ function App() {
           console.log("Everything is OK!");
           setName("");
           setAmount("");
+          setOrder_id("");
         })
         .catch((err) => {
           console.log(err);
@@ -65,6 +75,7 @@ function App() {
     bodyData.append("contact", contact);
     bodyData.append("email", email);
     bodyData.append("address", address);
+    bodyData.append("order_id", order_id);
 
     // console.log("check2");
 
@@ -77,23 +88,38 @@ function App() {
       },
       data: bodyData,
     }).then((res) => {
+      setOrder_id(res.order_id);
+      // useEffect(()=>{
+      // localStorage.setItem("order_id", JSON.stringify(order_id));
+      localStorage.setItem("res", JSON.stringify(res));
+      // setOrder_id()
+      // },[]);
       return res;
     });
 
     console.log(data);
 
+    // const [data, setdata] = useState("");
+
     // in data we will receive an object from the backend with the information about the payment
     //that has been made by the user
-    // console.log("check3 81");
+    console.log("check3 81");
+    var Jsondata = JSON.parse(localStorage.getItem("res"))["data"]
+    var order_id = Jsondata["order_id"]
+    console.log(order_id);
+    
+    console.log(Jsondata);
+
+
     var options = {
       key: "write here key",
-      key_secret: "write here secret key",
+      key_secret: "write here key secret",
       amount: amount * 100,
       currency: "INR",
       name: "Org. Name",
-      description: "Test teansaction",
+      description: "Test transaction",
       image: "", // add image url
-      order_id: data.order_id,
+      order_id: order_id, //localStorage.getItem("res.data.order_id"),
       handler: function (response) {
         // we will handle success by calling handlePayment method and
         // will pass the response that we've got from razorpay
@@ -130,7 +156,7 @@ function App() {
     // console.log("check4 108");
     var rzp1 = new window.Razorpay(options);
     rzp1.open();
-  
+
     // console.log("check5 111");
   };
   // console.log("check6 113");
