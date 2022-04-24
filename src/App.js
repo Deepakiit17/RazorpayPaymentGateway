@@ -104,16 +104,19 @@ function App() {
     // in data we will receive an object from the backend with the information about the payment
     //that has been made by the user
     console.log("check3 81");
-    var Jsondata = JSON.parse(localStorage.getItem("res"))["data"]
-    var order_id = Jsondata["order_id"]
+    var Jsondata = JSON.parse(localStorage.getItem("res"))["data"];
+    var order_id = Jsondata["order_id"];
     console.log(order_id);
-    
+
     console.log(Jsondata);
 
+    console.log(process.env);
+
+    // require('dotenv').config()
 
     var options = {
-      key: "write here key",
-      key_secret: "write here key secret",
+      key: process.env.REACT_APP_RAZORPAY_KEY,
+      key_secret: process.env.REACT_APP_RAZORPAY_KEY_SECRET,
       amount: amount * 100,
       currency: "INR",
       name: "Org. Name",
